@@ -1,7 +1,7 @@
 package testhandlers
 
 import (
-	"$SERVICE_NAME/src/internal/web"
+	"<MODULE_NAME>/src/internal/web"
 	"github.com/gin-gonic/gin"
 )
 

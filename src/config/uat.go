@@ -1,8 +1,8 @@
 package config
 
 import (
-	GLogger "$SERVICE_NAME/lib/logger"
-	"$SERVICE_NAME/src/constants"
+	GLogger "<MODULE_NAME>/lib/logger"
+	"<MODULE_NAME>/src/constants"
 	"fmt"
 
 	"github.com/gin-gonic/gin"
