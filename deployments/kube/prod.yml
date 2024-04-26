@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    type: prod-$SERVICE_NAME
+    version: primary
+  name: prod-$SERVICE_NAME-config
+  namespace: $NAMESPACE
+data:
+  app_port: ':8080'
+  app_name: prod-$SERVICE_NAME
+  app_version: 1.0.0
+  application: prod-$SERVICE_NAME
+  dd_service_name: prod-$SERVICE_NAME
+  service_name: prod-&SERVICE_NAME
+  aws_region: ap-south-1
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: prod-$SERVICE_NAME
+    version: primary
+  name: prod-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: prod-$SERVICE_NAME
+  template:
+    metadata:
+      labels:
+        type: prod-$SERVICE_NAME
+        version: primary
+    spec:
+      serviceAccountName: prod-$SERVICE_NAME-sa
+      containers:
+        - name: prod-$SERVICE_NAME-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/$PROJECT_NAME/$SERVICE_NAME:$IMGTAGHTTPSERVER
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: prod-$SERVICE_NAME-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: prod-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  ports:
+    - name: http-prod-$SERVICE_NAME
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    type: prod-$SERVICE_NAME
+  type: ClusterIP
+
+---

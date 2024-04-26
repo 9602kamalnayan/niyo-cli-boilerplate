@@ -1,0 +1,82 @@
+image:
+  name: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/base/os:alpine-aws-lts
+  aws:
+    oidc-role: "Enter_Your_OIDC_Role"
+
+definitions:
+  services:
+    docker:
+      memory: 4096
+  caches:
+    sonar: ~/.sonar/cache
+  steps:
+    - step: &SONAR_CHECK
+        name: Scanning sonar cloud
+        size: 2x
+        oidc: true
+        caches:
+          - node
+        script:
+          - export SONAR_URL=https://sonarcloud.io/
+          - export SONAR_ORG=niyo-solutions-inc
+          - export SONAR_PROJECT_KEY= Enter_Your_Project_Key
+          - pipe: sonarsource/sonarcloud-scan:2.0.0
+            variables:
+              SONAR_TOKEN: "Enter_Your_Sonar_Token"
+              EXTRA_ARGS: '-Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.organization=$SONAR_ORG -Dsonar.projectName=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_URL -Dsonar.sources=. -Dsonar.exclusions=bitbucket-pipelines.yml'
+        services:
+          - docker
+    - step: &ECR_Image_check
+        name: 'ECR'
+        oidc: true
+        services:
+          - docker
+        script:
+          - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.16.0
+          - trivy image $IMAGE_NAME_COMMIT | tee results.txt
+          - cat results.txt
+          - >
+            if grep -q "Total: 0 (UNKNOWN: 0, LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)" results.txt; then
+              echo "No vulnerabilities found. Proceeding with deployment."
+            else
+              echo "Vulnerabilities found. Pipeline will fail."
+            fi
+    - step: &Secret_Scan
+        name: 'Scanning Secrets'
+        size: 2x
+        oidc: true
+        caches:
+          - node
+        script:
+          - pipe: atlassian/git-secrets-scan:0.6.1
+            variables:
+              FILES: "."
+              ANNOTATION_SUMMARY: "Credentials found in code."
+        services:
+          - docker
+pipelines:
+  default:
+    - parallel:
+        steps:
+          - step: *SONAR_CHECK
+          - step: *ECR_Image_check
+          - step: *Secret_Scan
+  branches:
+    uat-deployment:
+      - parallel:
+          - step: *SONAR_CHECK
+    uat-integration:
+      - parallel:
+          - step: *SONAR_CHECK
+          - step: *ECR_Image_check
+          - step: *Secret_Scan
+    beta-integration:
+      - parallel:
+          - step: *SONAR_CHECK
+          - step: *ECR_Image_check
+          - step: *Secret_Scan
+    master:
+      - parallel:
+          - step: *SONAR_CHECK
+          - step: *ECR_Image_check
+          - step: *Secret_Scan

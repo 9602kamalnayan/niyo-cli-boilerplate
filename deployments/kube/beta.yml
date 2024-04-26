@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    type: beta-$SERVICE_NAME
+    version: primary
+  name: beta-$SERVICE_NAME-config
+  namespace: $NAMESPACE
+data:
+  app_port: ':8080'
+  app_name: beta-$SERVICE_NAME
+  app_version: 1.0.0
+  application: beta-$SERVICE_NAME
+  dd_service_name: beta-$SERVICE_NAME
+  service_name: beta-&SERVICE_NAME
+  aws_region: ap-south-1
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: beta-$SERVICE_NAME
+    version: primary
+  name: beta-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: beta-$SERVICE_NAME
+  template:
+    metadata:
+      labels:
+        type: beta-$SERVICE_NAME
+        version: primary
+    spec:
+      serviceAccountName: beta-$SERVICE_NAME-sa
+      containers:
+        - name: beta-$SERVICE_NAME-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/$SERVICE_NAME:$IMGTAGHTTPSERVER
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: beta-$SERVICE_NAME-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: beta-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  ports:
+    - name: http-beta-$SERVICE_NAME
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    type: beta-$SERVICE_NAME
+  type: ClusterIP
+
+---

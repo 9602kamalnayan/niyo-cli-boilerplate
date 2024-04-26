@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    type: uat-$SERVICE_NAME
+    version: primary
+  name: uat-$SERVICE_NAME-config
+  namespace: $NAMESPACE
+data:
+  app_port: ':8080'
+  app_name: uat-$SERVICE_NAME
+  app_version: 1.0.0
+  application: uat-$SERVICE_NAME
+  dd_service_name: uat-$SERVICE_NAME
+  service_name: uat-&SERVICE_NAME
+  aws_region: ap-south-1
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: uat-$SERVICE_NAME
+    version: primary
+  name: uat-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: uat-$SERVICE_NAME
+  template:
+    metadata:
+      labels:
+        type: uat-$SERVICE_NAME
+        version: primary
+    spec:
+      serviceAccountName: uat-$SERVICE_NAME-sa
+      containers:
+        - name: uat-$SERVICE_NAME-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/$SERVICE_NAME:$IMGTAGHTTPSERVER
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: uat-$SERVICE_NAME-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uat-$SERVICE_NAME
+  namespace: $NAMESPACE
+spec:
+  ports:
+    - name: http-uat-$SERVICE_NAME
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    type: uat-$SERVICE_NAME
+  type: ClusterIP
+
+---
