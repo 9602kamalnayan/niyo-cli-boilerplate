@@ -1,0 +1,65 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  labels:
+    type: dev-$ServiceName
+    version: primary
+  name: dev-$ServiceName-config
+  namespace: $Namespace
+data:
+  app_port: ':8080'
+  app_name: dev-$ServiceName
+  app_version: 1.0.0
+  application: dev-$ServiceName
+  dd_service_name: dev-$ServiceName
+  service_name: dev-$ServiceName
+  aws_region: ap-south-1
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    type: dev-$ServiceName
+    version: primary
+  name: dev-$ServiceName
+  namespace: $Namespace
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      type: dev-$ServiceName
+  template:
+    metadata:
+      labels:
+        type: dev-$ServiceName
+        version: primary
+    spec:
+      serviceAccountName: dev-$ServiceName-sa
+      containers:
+        - name: dev-$ServiceName-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/$ServiceName:$IMGTAGHTTPSERVER
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: dev-$ServiceName-config
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: dev-$ServiceName
+  namespace: $Namespace
+spec:
+  ports:
+    - name: http-dev-$ServiceName
+      port: 8080
+      targetPort: 8080
+      protocol: TCP
+  selector:
+    type: dev-$ServiceName
+  type: ClusterIP
+
+---
