@@ -1,10 +1,10 @@
 package main
 
 import (
-	"<MODULE_NAME>/src/config"
-	"<MODULE_NAME>/src/constants"
-	appgin "<MODULE_NAME>/src/internal/app/gin"
-	"<MODULE_NAME>/src/internal/helpers"
+	"$ServiceName/src/config"
+	"$ServiceName/src/constants"
+	appgin "$ServiceName/src/internal/app/gin"
+	"$ServiceName/src/internal/helpers"
 	"context"
 	"fmt"
 	"log"

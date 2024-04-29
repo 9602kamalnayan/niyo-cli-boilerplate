@@ -2,16 +2,16 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    type: uat-$SERVICE_NAME
+    type: uat-$ServiceName
     version: primary
-  name: uat-$SERVICE_NAME-config
-  namespace: $NAMESPACE
+  name: uat-$ServiceName-config
+  namespace: $Namespace
 data:
   app_port: ':8080'
-  app_name: uat-$SERVICE_NAME
+  app_name: uat-$ServiceName
   app_version: 1.0.0
-  application: uat-$SERVICE_NAME
-  dd_service_name: uat-$SERVICE_NAME
+  application: uat-$ServiceName
+  dd_service_name: uat-$ServiceName
   service_name: uat-&SERVICE_NAME
   aws_region: ap-south-1
 ---
@@ -20,46 +20,46 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    type: uat-$SERVICE_NAME
+    type: uat-$ServiceName
     version: primary
-  name: uat-$SERVICE_NAME
-  namespace: $NAMESPACE
+  name: uat-$ServiceName
+  namespace: $Namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      type: uat-$SERVICE_NAME
+      type: uat-$ServiceName
   template:
     metadata:
       labels:
-        type: uat-$SERVICE_NAME
+        type: uat-$ServiceName
         version: primary
     spec:
-      serviceAccountName: uat-$SERVICE_NAME-sa
+      serviceAccountName: uat-$ServiceName-sa
       containers:
-        - name: uat-$SERVICE_NAME-http-server
-          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/$SERVICE_NAME:$IMGTAGHTTPSERVER
+        - name: uat-$ServiceName-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/$ServiceName:$IMGTAGHTTPSERVER
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: uat-$SERVICE_NAME-config
+                name: uat-$ServiceName-config
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: uat-$SERVICE_NAME
-  namespace: $NAMESPACE
+  name: uat-$ServiceName
+  namespace: $Namespace
 spec:
   ports:
-    - name: http-uat-$SERVICE_NAME
+    - name: http-uat-$ServiceName
       port: 8080
       targetPort: 8080
       protocol: TCP
   selector:
-    type: uat-$SERVICE_NAME
+    type: uat-$ServiceName
   type: ClusterIP
 
 ---

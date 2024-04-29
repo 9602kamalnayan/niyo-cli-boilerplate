@@ -2,16 +2,16 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   labels:
-    type: prod-$SERVICE_NAME
+    type: prod-$ServiceName
     version: primary
-  name: prod-$SERVICE_NAME-config
-  namespace: $NAMESPACE
+  name: prod-$ServiceName-config
+  namespace: $Namespace
 data:
   app_port: ':8080'
-  app_name: prod-$SERVICE_NAME
+  app_name: prod-$ServiceName
   app_version: 1.0.0
-  application: prod-$SERVICE_NAME
-  dd_service_name: prod-$SERVICE_NAME
+  application: prod-$ServiceName
+  dd_service_name: prod-$ServiceName
   service_name: prod-&SERVICE_NAME
   aws_region: ap-south-1
 ---
@@ -20,46 +20,46 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   labels:
-    type: prod-$SERVICE_NAME
+    type: prod-$ServiceName
     version: primary
-  name: prod-$SERVICE_NAME
-  namespace: $NAMESPACE
+  name: prod-$ServiceName
+  namespace: $Namespace
 spec:
   replicas: 1
   selector:
     matchLabels:
-      type: prod-$SERVICE_NAME
+      type: prod-$ServiceName
   template:
     metadata:
       labels:
-        type: prod-$SERVICE_NAME
+        type: prod-$ServiceName
         version: primary
     spec:
-      serviceAccountName: prod-$SERVICE_NAME-sa
+      serviceAccountName: prod-$ServiceName-sa
       containers:
-        - name: prod-$SERVICE_NAME-http-server
-          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/$PROJECT_NAME/$SERVICE_NAME:$IMGTAGHTTPSERVER
+        - name: prod-$ServiceName-http-server
+          image: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/$PROJECT_NAME/$ServiceName:$IMGTAGHTTPSERVER
           imagePullPolicy: Always
           ports:
             - containerPort: 8080
           envFrom:
             - configMapRef:
-                name: prod-$SERVICE_NAME-config
+                name: prod-$ServiceName-config
 ---
 
 apiVersion: v1
 kind: Service
 metadata:
-  name: prod-$SERVICE_NAME
-  namespace: $NAMESPACE
+  name: prod-$ServiceName
+  namespace: $Namespace
 spec:
   ports:
-    - name: http-prod-$SERVICE_NAME
+    - name: http-prod-$ServiceName
       port: 8080
       targetPort: 8080
       protocol: TCP
   selector:
-    type: prod-$SERVICE_NAME
+    type: prod-$ServiceName
   type: ClusterIP
 
 ---

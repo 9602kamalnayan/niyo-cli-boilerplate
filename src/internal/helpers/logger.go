@@ -1,9 +1,9 @@
 package helpers
 
 import (
-	GLogger "<MODULE_NAME>/lib/logger"
-	"<MODULE_NAME>/src/config"
-	"<MODULE_NAME>/src/constants"
+	GLogger "$ServiceName/lib/logger"
+	"$ServiceName/src/config"
+	"$ServiceName/src/constants"
 	"context"
 	"sync"
 )
