@@ -12,7 +12,7 @@ data:
   app_version: 1.0.0
   application: prod-$ServiceName
   dd_service_name: prod-$ServiceName
-  service_name: prod-&SERVICE_NAME
+  service_name: prod-$ServiceName
   aws_region: ap-south-1
 ---
 

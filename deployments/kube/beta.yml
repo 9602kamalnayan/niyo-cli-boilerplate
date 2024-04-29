@@ -12,7 +12,7 @@ data:
   app_version: 1.0.0
   application: beta-$ServiceName
   dd_service_name: beta-$ServiceName
-  service_name: beta-&SERVICE_NAME
+  service_name: beta-$ServiceName
   aws_region: ap-south-1
 ---
 

@@ -12,7 +12,7 @@ data:
   app_version: 1.0.0
   application: uat-$ServiceName
   dd_service_name: uat-$ServiceName
-  service_name: uat-&SERVICE_NAME
+  service_name: uat-$ServiceName
   aws_region: ap-south-1
 ---
 
