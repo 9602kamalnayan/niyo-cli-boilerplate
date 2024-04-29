@@ -1,9 +1,9 @@
 package app_gin
 
 import (
-	GLogger "<MODULE_NAME>/lib/logger"
-	"<MODULE_NAME>/src/config"
-	apigin "<MODULE_NAME>/src/internal/api/gin"
+	GLogger "$ServiceName/lib/logger"
+	"$ServiceName/src/config"
+	apigin "$ServiceName/src/internal/api/gin"
 	"context"
 	"github.com/gin-gonic/gin"
 )

@@ -1,7 +1,7 @@
 package aws_secretsmanager
 
 import (
-	GLogger "<MODULE_NAME>/lib/logger"
+	GLogger "$ServiceName/lib/logger"
 	"context"
 	"encoding/json"
 	"fmt"

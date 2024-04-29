@@ -1,10 +1,10 @@
 package gin
 
 import (
-	"<MODULE_NAME>/src/config"
-	"<MODULE_NAME>/src/constants"
-	"<MODULE_NAME>/src/internal/helpers"
-	"<MODULE_NAME>/src/internal/web"
+	"$ServiceName/src/config"
+	"$ServiceName/src/constants"
+	"$ServiceName/src/internal/helpers"
+	"$ServiceName/src/internal/web"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"strings"

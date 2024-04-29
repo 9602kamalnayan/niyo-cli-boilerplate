@@ -1,4 +1,4 @@
-module <MODULE_NAME>
+module $ServiceName
 
 go 1.21.6
 

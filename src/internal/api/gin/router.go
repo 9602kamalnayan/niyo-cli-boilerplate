@@ -1,11 +1,11 @@
 package api_gin
 
 import (
-	GLogger "<MODULE_NAME>/lib/logger"
-	"<MODULE_NAME>/src/constants"
-	routemodels "<MODULE_NAME>/src/internal/api/gin/models"
-	"<MODULE_NAME>/src/internal/handlers/gin/testhandlers"
-	ginmiddlewares "<MODULE_NAME>/src/internal/middleware/gin"
+	GLogger "$ServiceName/lib/logger"
+	"$ServiceName/src/constants"
+	routemodels "$ServiceName/src/internal/api/gin/models"
+	"$ServiceName/src/internal/handlers/gin/testhandlers"
+	ginmiddlewares "$ServiceName/src/internal/middleware/gin"
 	"github.com/gin-gonic/gin"
 	"github.com/swaggo/files"
 	"github.com/swaggo/gin-swagger"
