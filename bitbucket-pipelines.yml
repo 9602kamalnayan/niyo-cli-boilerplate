@@ -1,0 +1,107 @@
+image:
+  name: 287726214764.dkr.ecr.ap-south-1.amazonaws.com/base/node:node-21-alpine-root
+  aws:
+    oidc-role: <OIDC_ROLE>
+
+definitions:
+  services:
+    docker:
+      memory: 1024
+
+  steps:
+    - step: &Snyk_Check
+        name: snyk-vulnerability-check
+        oidc: true
+        size: 2x
+        script:
+          - npm cache clean --force
+          - npm install --force ./server
+          - pipe: snyk/snyk-scan:0.5.2
+            variables:
+              SNYK_TOKEN: ${SNYK_Token}
+              LANGUAGE: "npm"
+              DONT_BREAK_BUILD: "true"
+              DEBUG: "true"
+              MONITOR: "false"
+              CODE_INSIGHTS_RESULTS: "true"
+        services:
+          - docker
+    - step: &Sonar_Quality_Check
+        name: Scanning sonar cloud
+        oidc: true
+        size: 2x
+        script:
+          - export SONAR_TOKEN=${SONAR_TOKEN}
+          - export SONAR_URL=https://sonarcloud.io/
+          - export SONAR_ORG=niyo-solutions-inc
+          - export SONAR_PROJECT_KEY=niyo-solutions-inc_$ServiceName
+          - export NODE_ENV=uat
+          - pipe: sonarsource/sonarcloud-scan:2.0.0
+            variables:
+              SONAR_TOKEN: ${SONAR_TOKEN}
+              EXTRA_ARGS: "-Dsonar.projectKey=$SONAR_PROJECT_KEY -Dsonar.organization=$SONAR_ORG -Dsonar.projectName=$SONAR_PROJECT_KEY -Dsonar.host.url=$SONAR_URL -Dsonar.sources=. -Dsonar.exclusions=**/*.spec.ts,**/*.mock.ts,src/config/**,Dockerfile,!src/config/configuration.ts"
+        services:
+          - docker
+    - step: &Secret_Scan
+        name: Scanning secrets
+        oidc: true
+        size: 2x
+        caches:
+          - node
+        script:
+          - pipe: atlassian/git-secrets-scan:0.6.1
+            variables:
+              FILES: "."
+              ANNOTATION_SUMMARY: "Credentials found in code."
+        services:
+          - docker
+    - step: &ECR_Image_check
+        name: "ECR"
+        oidc: true
+        size: 2x
+        services:
+          - docker
+        script:
+          - export AWS_ECR_REPOSITORY_UAT="287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/x2-core-algo-risk-analysis-backend"
+          - export IMAGE_NAME_COMMIT=$AWS_ECR_REPOSITORY_UAT
+          - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.16.0
+          - trivy image $IMAGE_NAME_COMMIT:$BITBUCKET_BRANCH-$BITBUCKET_COMMIT | tee results.txt
+          - cat results.txt
+          - >
+            if grep -q "Total: 0 (LOW: 0, MEDIUM: 0, HIGH: 0, CRITICAL: 0)" results.txt; then
+              echo "No vulnerabilities found. Proceeding with deployment."
+            else
+              echo "Vulnerabilities found. Pipeline will fail."
+            fi
+pipelines:
+  custom:
+    code-review:
+      - parallel:
+          - step: *Sonar_Quality_Check
+          - step: *Snyk_Check
+          - step: *Secret_Scan
+  branches:
+    uat-deployment:
+      - parallel:
+          - step: *Sonar_Quality_Check
+          - step: *Secret_Scan
+          - step: *ECR_Image_check
+          - step: *Snyk_Check
+    uat-integration:
+      - parallel:
+          - step: *Sonar_Quality_Check
+          - step: *Secret_Scan
+          - step: *Snyk_Check
+          - step: *ECR_Image_check
+    beta-integration:
+      - parallel:
+          - step: *Sonar_Quality_Check
+          - step: *Snyk_Check
+          - step: *Secret_Scan
+          - step: *ECR_Image_check
+    master:
+      - parallel:
+          - step: *Sonar_Quality_Check
+          - step: *Snyk_Check
+          - step: *Secret_Scan
+          - step: *ECR_Image_check
