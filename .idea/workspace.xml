@@ -4,38 +4,7 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="dcc8f6e5-377b-434b-b27f-538b59e235bc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.kube/beta-deployment.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.kube/dev-deployment.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.kube/prod-deployment.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/.kube/uat-deployment.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/bitbucket-pipelines.yml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/app.controller.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/app.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/app.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/constants/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/helper/logger.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/middleware/incoming-request-logger.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/middleware/set-http-context.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/aws/aws.mock.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/aws/aws.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/aws/aws.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/http-connector/.dto/allowed-http-methods.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/http-connector/http-connector-interface.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/http-connector/http-connector.module.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/services/http-connector/http-connector.service.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/utils/dd-tracer.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/utils/index.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/common/utils/metrics-monitoring.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/config/beta.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/config/configuration.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/config/dev.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/config/prod.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/config/uat.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/src/main.ts" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/tsconfig.build.json" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/tsconfig.json" afterDir="false" />
-    </list>
+    <list default="true" id="dcc8f6e5-377b-434b-b27f-538b59e235bc" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
