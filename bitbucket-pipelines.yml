@@ -62,8 +62,8 @@ definitions:
         services:
           - docker
         script:
-          - export AWS_ECR_REPOSITORY_UAT="287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/x2-core-algo-risk-analysis-backend"
-          - export IMAGE_NAME_COMMIT=$AWS_ECR_REPOSITORY_UAT
+          - export AWS_AWS_ECR_REPOSITORYSITORY_UAT="287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/x2-core-algo-risk-analysis-backend"
+          - export IMAGE_NAME_COMMIT=$AWS_AWS_ECR_REPOSITORYSITORY_UAT
           - curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin v0.16.0
           - trivy image $IMAGE_NAME_COMMIT:$BITBUCKET_BRANCH-$BITBUCKET_COMMIT | tee results.txt
           - cat results.txt
