@@ -73,6 +73,113 @@ definitions:
             else
               echo "Vulnerabilities found. Pipeline will fail."
             fi
+
+    - step: &Build_Image
+        name: "DOCKER_IMAGE_BUILD"
+        oidc: true
+        size: 2x
+        services:
+          - docker
+        script:
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=UAT_OIDC
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - export AWS_ECR=AWS_ECR_REPOSITORY
+          - export IMAGE_NAME_COMMIT=$AWS_ECR
+          - npm install -g @nestjs/cli
+          - cd server
+          - pwd
+          - npm install
+          - npm run build
+          - cd ..
+          - aws ecr get-login-password --region ap-south-1 | docker login --username AWS --password-stdin 287726214764.dkr.ecr.ap-south-1.amazonaws.com
+          - docker build -f Dockerfile -t $IMAGE_NAME_COMMIT:$BITBUCKET_BRANCH-$BITBUCKET_COMMIT .
+          - docker push $IMAGE_NAME_COMMIT:$BITBUCKET_BRANCH-$BITBUCKET_COMMIT
+
+    - step: &DEPLOY_DEV
+        name: "EKS_Deploy"
+        image: atlassian/pipelines-awscli
+        size: 2x
+        oidc: true
+        script:
+          - apk add wget
+          - wget -O kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+          - mkdir ~/.kube
+          - cp .kube/config/dev-config.yml ~/.kube/config
+          - chmod +x ./kubectl
+          - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=UAT_OIDC
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - sed -i 's/\$IMGTAG'"/$BITBUCKET_BRANCH-$BITBUCKET_COMMIT/g" .kube/deployment/dev-deployment.yml
+          - kubectl apply -f .kube/deployment/uat-deployment.yml
+
+    - step: &DEPLOY_UAT
+        name: "EKS_Deploy"
+        image: atlassian/pipelines-awscli
+        size: 2x
+        oidc: true
+        script:
+          - apk add wget
+          - wget -O kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+          - mkdir ~/.kube
+          - cp .kube/config/uat-config.yml ~/.kube/config
+          - chmod +x ./kubectl
+          - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=UAT_OIDC
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - sed -i 's/\$IMGTAG'"/$BITBUCKET_BRANCH-$BITBUCKET_COMMIT/g" .kube/deployment/uat-deployment.yml
+          - kubectl apply -f .kube/deployment/uat-deployment.yml
+        services:
+          - docker
+
+    - step: &DEPLOY_BETA
+        name: "EKS_Deploy_BETA"
+        image: atlassian/pipelines-awscli
+        size: 2x
+        oidc: true
+        script:
+          - apk add wget
+          - wget -O kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+          - mkdir ~/.kube
+          - cp .kube/config/beta-config.yml ~/.kube/config
+          - chmod +x ./kubectl
+          - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=PROD_OIDC
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - sed -i 's/\$IMGTAG'"/$BITBUCKET_BRANCH-$BITBUCKET_COMMIT/g" .kube/deployment/beta-deployment.yml
+          - kubectl apply -f .kube/deployment/beta-deployment.yml
+        services:
+          - docker
+
+    - step: &DEPLOY_PROD
+        name: "EKS_Deploy_PROD"
+        image: atlassian/pipelines-awscli
+        size: 2x
+        oidc: true
+        trigger: manual
+        script:
+          - apk add wget
+          - wget -O kubectl https://s3.us-west-2.amazonaws.com/amazon-eks/1.18.9/2020-11-02/bin/linux/amd64/kubectl
+          - mkdir ~/.kube
+          - cp .kube/config/prod-config.yml ~/.kube/config
+          - chmod +x ./kubectl
+          - mkdir -p $HOME/bin && cp ./kubectl $HOME/bin/kubectl && export PATH=$PATH:$HOME/bin
+          - export AWS_DEFAULT_REGION=$AWS_DEFAULT_REGION
+          - export AWS_ROLE_ARN=PROD_OIDC
+          - export AWS_WEB_IDENTITY_TOKEN_FILE=$(pwd)/web-identity-token
+          - echo $BITBUCKET_STEP_OIDC_TOKEN > $(pwd)/web-identity-token
+          - sed -i 's/\$IMGTAG'"/$BITBUCKET_BRANCH-$BITBUCKET_COMMIT/g" .kube/deployment/prod-deployment.yml
+          - kubectl apply -f .kube/deployment/prod-deployment.yml
+        services:
+          - docker
+
 pipelines:
   custom:
     code-review:
@@ -87,21 +194,29 @@ pipelines:
           - step: *Secret_Scan
           - step: *ECR_Image_check
           - step: *Snyk_Check
+      - step: *Build_Image
+      - step: *DEPLOY_DEV
     uat-integration:
       - parallel:
           - step: *Sonar_Quality_Check
           - step: *Secret_Scan
           - step: *Snyk_Check
           - step: *ECR_Image_check
+      - step: *Build_Image
+      - step: *DEPLOY_UAT
     beta-integration:
       - parallel:
           - step: *Sonar_Quality_Check
           - step: *Snyk_Check
           - step: *Secret_Scan
           - step: *ECR_Image_check
+      - step: *Build_Image
+      - step: *DEPLOY_BETA
     master:
       - parallel:
           - step: *Sonar_Quality_Check
           - step: *Snyk_Check
           - step: *Secret_Scan
           - step: *ECR_Image_check
+      - step: *Build_Image
+      - step: *DEPLOY_PROD

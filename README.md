@@ -29,13 +29,13 @@ cd server && npm install
 - a. bitbucket-pipelines.yml (Mandatory)
 
   - Replace UAT_OIDC with the role provided by devops. (Ex. $NIYO_UAT_BITBUCKET_OIDC_ECR_NINJAFACTORY-2 || arn:aws:iam::914620821736:role/ NIYO_UAT_BITBUCKET_OIDC_ECR_NINJAFACTORY-2)
-  - Replace PROD_OIDC with the role provided by devops. (Ex. $$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY-2 || arn:aws:iam::914620821736:role/$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY)
+  - Replace PROD_OIDC with the role provided by devops. (Ex. $PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY-2 || arn:aws:iam::914620821736:role/$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY)
   - Replace AWS_AWS_ECR_REPOSITORYSITORY with the ecr repo provided by devops. (Ex. 287726214764.dkr.ecr.ap-south-1.amazonaws.com/niyox2/x2-core-algo-risk-analysis-backend)
   - Replace SNYK_TOKEN with the token name provided by infosec. (Ex. SNYK_Token_X2 || "6dwubd34eek02323" )
 
 - b. .kube/deployment/\*-deployment.yml (Mandatory)
 
-  - Replace AWS_ECR_REPOSITORYSITORY with the ecr repo provided by devops. (Ex. $$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY-2 || arn:aws:iam::914620821736:role/$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY)
+  - Replace AWS_ECR_REPOSITORY with the ecr repo provided by devops. (Ex. $PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY-2 || arn:aws:iam::914620821736:role/$PROD_X2_BITBUCKET_OIDC_ECR_NINJAFACTORY)
 
 - c. ./kube/config/\*-config.yml (Mandatory)
 
